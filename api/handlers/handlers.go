@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -21,5 +20,6 @@ func ShortenURLHandler(w http.ResponseWriter, r *http.Request) {
 	longUrl := request.Long_URL
 
 	shortURL := shortening.ShortenURL(longUrl)
-	fmt.Println(shortURL)
+	w.Header().Set("Content-Type", "text/plain")
+	w.Write([]byte(shortURL))
 }
