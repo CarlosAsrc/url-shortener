@@ -43,14 +43,16 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Extract repository name and image tag
+      - name: Extract image tag
         id: extract
         run: |
           echo "##[set-output name=tag;]$(echo ${{ github.sha }})"
 
       - name: Build and push Docker image
         run: |
-          docker buildx build --push --tag ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/url_shortener_images:${{ steps.extract.outputs.tag }} .
+          IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/url_shortener_images
+          VERSION_TAG=${{ steps.extract.outputs.tag }}
+          docker buildx build --push --tag $IMAGE_URI:$VERSION_TAG --tag $IMAGE_URI:latest -f Dockerfile .
 
       - name: Logout from Amazon ECR
         run: |

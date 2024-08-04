@@ -8,7 +8,7 @@ resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
 }
 
-resource "aws_subnet" "subnet" {
+resource "aws_subnet" "url_shortener_subnet" {
   vpc_id     = aws_vpc.main.id
   cidr_block = "10.0.1.0/24"
 }
@@ -19,8 +19,8 @@ resource "aws_security_group" "allow_http" {
   vpc_id = aws_vpc.main.id
 
   ingress {
-    from_port   = 80
-    to_port     = 80
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -47,15 +47,15 @@ resource "aws_route_table" "rt" {
 }
 
 resource "aws_route_table_association" "rta" {
-  subnet_id      = aws_subnet.subnet.id
+  subnet_id      = aws_subnet.url_shortener_subnet.id
   route_table_id = aws_route_table.rt.id
 }
 
 resource "aws_instance" "golang_app" {
-  ami             = "ami-0c55b159cbfafe1f0"
+  ami             = "ami-0ba9883b710b05ac6"
   instance_type   = "t2.micro"
-  subnet_id       = aws_subnet.subnet.id
-  security_groups = [aws_security_group.web.name]
+  subnet_id       = aws_subnet.url_shortener_subnet.id
+  vpc_security_group_ids = [aws_security_group.allow_http.id]
 
   tags = {
     Name = "GolangAppInstance"
@@ -67,7 +67,7 @@ resource "aws_instance" "golang_app" {
               yum install -y docker
               service docker start
               usermod -a -G docker ec2-user
-              docker run -d -p 80:80 <your-docker-image>
+              docker run -d -p 8080:8080 446343335231.dkr.ecr.us-east-1.amazonaws.com/url_shortener_images:latest
               EOF
 }
 
