@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: golang:1.22.5
+    image: golang:1.22
     container_name: url-shortener
     volumes:
       - .:/go/src/app
