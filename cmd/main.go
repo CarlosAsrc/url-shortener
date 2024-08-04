@@ -4,13 +4,17 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/CarlosAsrc/url-shortener/api/handlers"
+	"github.com/CarlosAsrc/url-shortener/api/routes"
 )
 
 func main() {
 	port := ":8080"
 
-	http.HandleFunc("/shorten", handlers.ShortenURLHandler)
-	http.ListenAndServe(port, nil)
-	fmt.Printf("Server listen in port %s", port)
+	router := routes.SetupRoutes()
+
+	fmt.Printf("Server listening on port %s\n", port)
+
+	if err := http.ListenAndServe(port, router); err != nil {
+		fmt.Printf("Error starting server: %v\n", err)
+	}
 }

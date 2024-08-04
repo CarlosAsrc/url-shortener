@@ -1,13 +1,12 @@
 package shortening
 
 import (
+	"fmt"
 	"hash/crc32"
-
-	"github.com/catinello/base62"
 )
 
 func ShortenURL(longUrl string) string {
 	hasher := crc32.NewIEEE()
 	hasher.Write([]byte(longUrl))
-	return base62.Encode(int(hasher.Sum32()))
+	return fmt.Sprintf("%x", hasher.Sum32())
 }
