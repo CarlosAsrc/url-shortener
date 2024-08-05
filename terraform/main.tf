@@ -1,9 +1,24 @@
 # main.tf
+// App setup and tagging:
 provider "aws" {
   profile = "default"
   region = "us-east-1"
+  alias = "application"
 }
 
+resource "aws_servicecatalogappregistry_application" "url_shortener" {
+  provider    = aws.application
+  name        = "UrlShortener"
+  description = "Simple URL Shortener application"
+}
+
+provider "aws" {
+  default_tags {
+    tags = aws_servicecatalogappregistry_application.url_shortener.application_tag
+  }
+}
+
+// NETWORKFING:
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
 }
@@ -21,6 +36,13 @@ resource "aws_security_group" "allow_http" {
   ingress {
     from_port   = 8080
     to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -51,15 +73,52 @@ resource "aws_route_table_association" "rta" {
   route_table_id = aws_route_table.rt.id
 }
 
+// EC2 and ECR Permissions:
+resource "aws_iam_role" "ec2_instance_role" {
+  name = "ec2_instance_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "ecr_access_policy" {
+  name   = "ecr_access_policy"
+  role   = aws_iam_role.ec2_instance_role.id
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect   = "Allow"
+      Action   = [
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage",
+        "ecr:GetAuthorizationToken"
+      ]
+      Resource = "*"
+    }]
+  })
+}
+
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+  name = "ec2_instance_profile"
+  role = aws_iam_role.ec2_instance_role.name
+}
+
+// EC2 Instance:
 resource "aws_instance" "golang_app" {
   ami             = "ami-0ba9883b710b05ac6"
   instance_type   = "t2.micro"
   subnet_id       = aws_subnet.url_shortener_subnet.id
   vpc_security_group_ids = [aws_security_group.allow_http.id]
-
-  tags = {
-    Name = "GolangAppInstance"
-  }
+  associate_public_ip_address = true
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
 
   user_data = <<-EOF
               #!/bin/bash
@@ -67,6 +126,7 @@ resource "aws_instance" "golang_app" {
               yum install -y docker
               service docker start
               usermod -a -G docker ec2-user
+              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 446343335231.dkr.ecr.us-east-1.amazonaws.com
               docker run -d -p 8080:8080 446343335231.dkr.ecr.us-east-1.amazonaws.com/url_shortener_images:latest
               EOF
 }
