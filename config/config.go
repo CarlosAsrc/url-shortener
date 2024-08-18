@@ -20,8 +20,9 @@ func GetConfig() Config {
 	}
 
 	viper.SetConfigName(env)
-	viper.SetConfigType("yaml")
+	viper.SetConfigType("yml")
 	viper.AddConfigPath("./config")
+	viper.AddConfigPath("/app/config")
 
 	err := viper.ReadInConfig()
 	if err != nil {

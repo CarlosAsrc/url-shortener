@@ -89,8 +89,8 @@ resource "aws_iam_role" "ec2_instance_role" {
   })
 }
 
-resource "aws_iam_role_policy" "ecr_access_policy" {
-  name   = "ecr_access_policy"
+resource "aws_iam_role_policy" "ecr_dynamodb_access_policy" {
+  name   = "ecr_dynamodb_access_policy"
   role   = aws_iam_role.ec2_instance_role.id
   policy = jsonencode({
     Version = "2012-10-17",
@@ -102,7 +102,20 @@ resource "aws_iam_role_policy" "ecr_access_policy" {
         "ecr:GetAuthorizationToken"
       ]
       Resource = "*"
-    }]
+    },
+    {
+        Effect   = "Allow"
+        Action   = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Query",
+          "dynamodb:Scan"
+        ]
+        Resource = aws_dynamodb_table.url_table.arn
+      }
+    ]
   })
 }
 
