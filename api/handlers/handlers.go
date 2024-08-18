@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/gorilla/mux"
 )
 
 type ShortenURLRequest struct {
@@ -45,6 +46,14 @@ func (h *URLHandler) ShortenURLHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(shortUrlResponse)
 }
 
+func (h *URLHandler) GetLongURLHandler(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	shortURL := params["shortURL"]
+	longURL := get(h, shortURL)
+	w.Header().Set("Location", longURL)
+	w.WriteHeader(http.StatusMovedPermanently)
+}
+
 func save(h *URLHandler, shortURL string, longURL string) {
 
 	item := map[string]types.AttributeValue{
@@ -65,4 +74,30 @@ func save(h *URLHandler, shortURL string, longURL string) {
 	}
 
 	fmt.Println("Successfully added item to DynamoDB")
+}
+
+func get(h *URLHandler, shortURL string) string {
+	key := map[string]types.AttributeValue{
+		"shortUrl": &types.AttributeValueMemberS{Value: shortURL},
+	}
+
+	updateItemInput := &dynamodb.UpdateItemInput{
+		TableName:        aws.String(h.TableName),
+		Key:              key,
+		UpdateExpression: aws.String("SET accessCount = accessCount + :inc"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":inc": &types.AttributeValueMemberN{Value: "1"},
+		},
+		ReturnValues: "ALL_NEW",
+	}
+
+	updateOutput, err := h.DynamoDBClient.UpdateItem(context.TODO(), updateItemInput)
+	if err != nil {
+		log.Fatalf("Failed to increment access count: %v", err)
+	}
+
+	longURL := updateOutput.Attributes["longUrl"].(*types.AttributeValueMemberS).Value
+	fmt.Println(updateOutput.Attributes["accessCount"].(*types.AttributeValueMemberN).Value)
+
+	return longURL
 }
