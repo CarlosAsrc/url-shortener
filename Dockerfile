@@ -9,6 +9,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/main.go
 FROM scratch
 COPY --from=builder /app/main /app/main
 COPY config/ /app/config/
-COPY --from=builderStep /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 EXPOSE 8080
 ENTRYPOINT ["/app/main"]
