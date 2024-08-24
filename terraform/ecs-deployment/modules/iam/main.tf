@@ -24,8 +24,8 @@ resource "aws_iam_role_policy" "ecs_task_execution_policy" {
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
-      Effect   = "Allow"
-      Action   = [
+      Effect = "Allow"
+      Action = [
         "ecr:GetDownloadUrlForLayer",
         "ecr:BatchGetImage",
         "ecr:GetAuthorizationToken",
@@ -34,7 +34,13 @@ resource "aws_iam_role_policy" "ecs_task_execution_policy" {
         "logs:CreateLogGroup",
         "ecs:UpdateContainerInstancesState",
         "ecs:SubmitContainerStateChange",
-        "ecs:SubmitTaskStateChange"
+        "ecs:SubmitTaskStateChange",
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query",
+        "dynamodb:Scan"
       ]
       Resource = "*"
     }]
@@ -67,8 +73,8 @@ resource "aws_iam_role_policy" "ecs_instance_policy" {
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
-      Effect   = "Allow"
-      Action   = [
+      Effect = "Allow"
+      Action = [
         "ec2:Describe*",
         "ecs:CreateCluster",
         "ecs:DeregisterContainerInstance",

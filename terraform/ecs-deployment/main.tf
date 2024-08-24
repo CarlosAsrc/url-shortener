@@ -20,6 +20,10 @@ module "iam" {
   ecs_instance_profile_name    = "${var.app_name}-ecs-instance-profile"
 }
 
+module "dynamodb" {
+  source = "./modules/dynamodb"
+}
+
 module "ecs" {
   source = "./modules/ecs"
 

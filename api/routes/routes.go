@@ -12,6 +12,7 @@ func SetupRoutes(configs *appConfig.Config, db *dynamodb.Client) *mux.Router {
 	router := mux.NewRouter()
 	handler := &handlers.URLHandler{DynamoDBClient: db, TableName: configs.TableName}
 
+	router.HandleFunc("/health", handlers.HealthHandler).Methods("GET")
 	router.HandleFunc("/shorten", handler.ShortenURLHandler).Methods("POST")
 	router.HandleFunc("/long-url/{shortURL}", handler.GetLongURLHandler).Methods("GET")
 

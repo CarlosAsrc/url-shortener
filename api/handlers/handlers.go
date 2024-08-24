@@ -101,3 +101,8 @@ func get(h *URLHandler, shortURL string) string {
 
 	return longURL
 }
+
+func HealthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "OK")
+}
