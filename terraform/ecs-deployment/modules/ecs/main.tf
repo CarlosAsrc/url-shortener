@@ -9,10 +9,10 @@ resource "aws_ecs_capacity_provider" "ecs_capacity_provider" {
     auto_scaling_group_arn = var.auto_scaling_group_arn
 
     managed_scaling {
-      maximum_scaling_step_size = 1000
+      maximum_scaling_step_size = 3
       minimum_scaling_step_size = 1
       status                    = "ENABLED"
-      target_capacity           = 3
+      target_capacity           = 100
     }
   }
 }
@@ -34,7 +34,6 @@ resource "aws_ecs_task_definition" "task" {
   network_mode             = "awsvpc"
   requires_compatibilities = ["EC2"]
   cpu                      = var.cpu
-  memory                   = var.memory
   execution_role_arn       = var.execution_role_arn
   runtime_platform {
     operating_system_family = "LINUX"
@@ -65,7 +64,7 @@ resource "aws_ecs_task_definition" "task" {
       }
       health_check = {
         command     = ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
-        interval    = 30
+        interval    = 10
         timeout     = 10
         retries     = 3
         start_period = 60
@@ -111,7 +110,7 @@ resource "aws_lb_target_group" "ecs_tg" {
   health_check {
     protocol = "HTTP"
     port     = 8080
-    path     = "/"
+    path     = "/health"
   }
 }
 
@@ -133,11 +132,6 @@ resource "aws_ecs_service" "service" {
 
   triggers = {
     redeployment = timestamp()
-  }
-
-  capacity_provider_strategy {
-    capacity_provider = aws_ecs_capacity_provider.ecs_capacity_provider.name
-    weight            = 100
   }
 
   load_balancer {

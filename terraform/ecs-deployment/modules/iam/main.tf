@@ -93,6 +93,11 @@ resource "aws_iam_role_policy" "ecs_instance_policy" {
   })
 }
 
+resource "aws_iam_role_policy_attachment" "ecs_instance_role_policy_attachment" {
+  role       = aws_iam_role.ecs_instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
 resource "aws_iam_instance_profile" "ecs_instance_profile" {
   name = var.ecs_instance_profile_name
   role = aws_iam_role.ecs_instance_role.name

@@ -19,12 +19,12 @@ variable "desired_count" {
 }
 
 variable "min_count" {
-  description = "The desired number of ECS service instances."
+  description = "The min number of ECS service instances."
   type        = number
 }
 
 variable "max_count" {
-  description = "The desired number of ECS service instances."
+  description = "The max number of ECS service instances."
   type        = number
 }
 
@@ -35,5 +35,10 @@ variable "instance_profile" {
 
 variable "ecs_cluster_name" {
   description = "The name of the ECS cluster."
+  type        = string
+}
+
+variable "instance_type" {
+  description = "The type of the EC2 instance."
   type        = string
 }

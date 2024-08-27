@@ -1,5 +1,5 @@
 resource "aws_vpc" "ecs_vpc" {
-  cidr_block = var.cidr_block
+  cidr_block           = var.cidr_block
   enable_dns_hostnames = true
   tags = {
     Name = var.vpc_name
@@ -11,6 +11,7 @@ resource "aws_subnet" "public" {
   count             = length(var.public_subnet_cidrs)
   cidr_block        = element(var.public_subnet_cidrs, count.index)
   availability_zone = element(data.aws_availability_zones.available.names, count.index)
+  map_public_ip_on_launch = true
 
   tags = {
     Name = "${var.vpc_name}-public-subnet-${count.index + 1}"
@@ -53,6 +54,13 @@ resource "aws_security_group" "ecs_sg" {
   ingress {
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

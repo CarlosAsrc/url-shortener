@@ -15,9 +15,9 @@ module "vpc" {
 module "iam" {
   source = "./modules/iam"
 
-  ecs_task_execution_role_name = "${var.app_name}-ecs-task-execution-role"
-  ecs_instance_role_name       = "${var.app_name}-ecs-instance-role"
-  ecs_instance_profile_name    = "${var.app_name}-ecs-instance-profile"
+  ecs_task_execution_role_name = "${var.app_name}_ecs_task_execution_role"
+  ecs_instance_role_name       = "ecsInstanceRole"
+  ecs_instance_profile_name    = "${var.app_name}_ecs_instance_profile"
 }
 
 module "dynamodb" {
@@ -51,4 +51,5 @@ module "ec2" {
   max_count        = var.max_count
   instance_profile = module.iam.ecs_instance_profile_arn
   ecs_cluster_name = var.ecs_cluster_name
+  instance_type    = var.ecs_instance_type
 }

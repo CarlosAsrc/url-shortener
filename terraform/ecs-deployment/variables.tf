@@ -55,19 +55,19 @@ variable "container_image" {
 variable "ecs_instance_type" {
   description = "The EC2 instance type for ECS instances."
   type        = string
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
 
 variable "desired_count" {
   description = "The desired number of ECS instances."
   type        = number
-  default     = 1
+  default     = 2
 }
 
 variable "max_count" {
   description = "The maximum number of ECS instances."
   type        = number
-  default     = 2
+  default     = 3
 }
 
 variable "min_count" {

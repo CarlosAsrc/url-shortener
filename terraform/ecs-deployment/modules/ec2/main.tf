@@ -1,12 +1,12 @@
 resource "aws_launch_template" "ecs_lt" {
   name_prefix   = "ecs-template"
-  image_id      = "ami-0b5f24ecac7c8ece8"
-  instance_type = "t2.micro"
+  image_id      = "ami-0c45946ade6066f3d"
+  instance_type = var.instance_type
 
   key_name               = "teste-kp"
   vpc_security_group_ids = var.security_groups
   iam_instance_profile {
-    name = element(split("/", var.instance_profile), 1)
+    arn = var.instance_profile
   }
 
   block_device_mappings {
