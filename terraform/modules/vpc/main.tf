@@ -7,10 +7,10 @@ resource "aws_vpc" "ecs_vpc" {
 }
 
 resource "aws_subnet" "public" {
-  vpc_id            = aws_vpc.ecs_vpc.id
-  count             = length(var.public_subnet_cidrs)
-  cidr_block        = element(var.public_subnet_cidrs, count.index)
-  availability_zone = element(data.aws_availability_zones.available.names, count.index)
+  vpc_id                  = aws_vpc.ecs_vpc.id
+  count                   = length(var.public_subnet_cidrs)
+  cidr_block              = element(var.public_subnet_cidrs, count.index)
+  availability_zone       = element(data.aws_availability_zones.available.names, count.index)
   map_public_ip_on_launch = true
 
   tags = {
@@ -68,6 +68,13 @@ resource "aws_security_group" "ecs_sg" {
   ingress {
     from_port   = 8080
     to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
