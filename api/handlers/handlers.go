@@ -37,7 +37,12 @@ func (h *URLHandler) ShortenURLHandler(w http.ResponseWriter, r *http.Request) {
 	longUrl := request.Long_URL
 
 	shortURL := shortening.ShortenURL(longUrl)
-	save(h, shortURL, longUrl)
+	err := save(h, shortURL, longUrl)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
 
 	shortUrlResponse := ShortenURLResponse{Short_URL: shortURL}
 
@@ -49,12 +54,17 @@ func (h *URLHandler) ShortenURLHandler(w http.ResponseWriter, r *http.Request) {
 func (h *URLHandler) GetLongURLHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	shortURL := params["shortURL"]
-	longURL := get(h, shortURL)
+	longURL, err := get(h, shortURL)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
 	w.Header().Set("Location", longURL)
 	w.WriteHeader(http.StatusMovedPermanently)
 }
 
-func save(h *URLHandler, shortURL string, longURL string) {
+func save(h *URLHandler, shortURL string, longURL string) error {
 
 	item := map[string]types.AttributeValue{
 		"shortUrl":    &types.AttributeValueMemberS{Value: shortURL},
@@ -70,13 +80,15 @@ func save(h *URLHandler, shortURL string, longURL string) {
 
 	_, err := h.DynamoDBClient.PutItem(context.TODO(), input)
 	if err != nil {
-		log.Fatalf("Failed to put item, %v", err)
+		log.Printf("Failed to put item, %v", err)
+		return err
 	}
 
 	fmt.Println("Successfully added item to DynamoDB")
+	return nil
 }
 
-func get(h *URLHandler, shortURL string) string {
+func get(h *URLHandler, shortURL string) (string, error) {
 	key := map[string]types.AttributeValue{
 		"shortUrl": &types.AttributeValueMemberS{Value: shortURL},
 	}
@@ -93,13 +105,14 @@ func get(h *URLHandler, shortURL string) string {
 
 	updateOutput, err := h.DynamoDBClient.UpdateItem(context.TODO(), updateItemInput)
 	if err != nil {
-		log.Fatalf("Failed to increment access count: %v", err)
+		log.Printf("Failed to increment access count: %v", err)
+		return "", err
 	}
 
 	longURL := updateOutput.Attributes["longUrl"].(*types.AttributeValueMemberS).Value
 	fmt.Println(updateOutput.Attributes["accessCount"].(*types.AttributeValueMemberN).Value)
 
-	return longURL
+	return longURL, nil
 }
 
 func HealthHandler(w http.ResponseWriter, r *http.Request) {
