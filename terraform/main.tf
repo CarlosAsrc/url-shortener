@@ -15,7 +15,7 @@ module "vpc" {
 module "iam" {
   source = "./modules/iam"
 
-  ecs_task_execution_role_name = "${var.app_name}_ecs_task_execution_role"
+  ecs_task_execution_role_name = "ecsTaskExecutionRole"
   ecs_instance_role_name       = "ecsInstanceRole"
   ecs_instance_profile_name    = "${var.app_name}_ecs_instance_profile"
 }
