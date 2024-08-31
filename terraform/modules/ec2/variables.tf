@@ -1,5 +1,5 @@
-variable "subnets" {
-  description = "The subnets associated with the ECS service."
+variable "private_subnets" {
+  description = "The private subnets associated with the ECS service."
   type        = list(string)
 }
 

@@ -28,7 +28,8 @@ module "ecs" {
   source = "./modules/ecs"
 
   vpc_id                 = module.vpc.vpc_id
-  subnets                = module.vpc.public_subnets
+  public_subnets         = module.vpc.public_subnets
+  private_subnets        = module.vpc.private_subnets
   execution_role_arn     = module.iam.ecs_task_execution_role_arn
   ecs_cluster_name       = var.ecs_cluster_name
   ecs_task_family        = var.task_family_name
@@ -43,7 +44,7 @@ module "ecs" {
 module "ec2" {
   source = "./modules/ec2"
 
-  subnets          = module.vpc.public_subnets
+  private_subnets  = module.vpc.private_subnets
   security_groups  = [module.vpc.ecs_sg]
   vpc_id           = module.vpc.vpc_id
   desired_count    = var.desired_count
