@@ -1,3 +1,43 @@
+resource "aws_iam_role" "ecs_task_role" {
+  name = var.ecs_task_role_name
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+
+  tags = {
+    Name = var.ecs_task_role_name
+  }
+}
+
+resource "aws_iam_role_policy" "ecs_task_policy" {
+  name = var.ecs_task_policy_name
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+      ]
+      Resource = "*"
+    }]
+  })
+}
+
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = var.ecs_task_execution_role_name
 
@@ -34,13 +74,7 @@ resource "aws_iam_role_policy" "ecs_task_execution_policy" {
         "logs:CreateLogGroup",
         "ecs:UpdateContainerInstancesState",
         "ecs:SubmitContainerStateChange",
-        "ecs:SubmitTaskStateChange",
-        "dynamodb:GetItem",
-        "dynamodb:PutItem",
-        "dynamodb:UpdateItem",
-        "dynamodb:DeleteItem",
-        "dynamodb:Query",
-        "dynamodb:Scan"
+        "ecs:SubmitTaskStateChange"
       ]
       Resource = "*"
     }]
@@ -67,7 +101,7 @@ resource "aws_iam_role" "ecs_instance_role" {
 }
 
 resource "aws_iam_role_policy" "ecs_instance_policy" {
-  name = "${var.ecs_instance_role_name}_policy"
+  name = var.ecs_instance_policy_name
   role = aws_iam_role.ecs_instance_role.id
 
   policy = jsonencode({

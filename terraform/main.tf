@@ -18,6 +18,9 @@ module "iam" {
   ecs_task_execution_role_name = "ecsTaskExecutionRole"
   ecs_instance_role_name       = "ecsInstanceRole"
   ecs_instance_profile_name    = "${var.app_name}_ecs_instance_profile"
+  ecs_task_role_name           = "ecsTaskRole"
+  ecs_task_policy_name         = "ecsTaskPolicy"
+  ecs_instance_policy_name     = "ecsInstancePolicy"
 }
 
 module "dynamodb" {
@@ -31,6 +34,7 @@ module "ecs" {
   public_subnets         = module.vpc.public_subnets
   private_subnets        = module.vpc.private_subnets
   execution_role_arn     = module.iam.ecs_task_execution_role_arn
+  task_role_arn          = module.iam.ecs_task_role_arn
   ecs_cluster_name       = var.ecs_cluster_name
   ecs_task_family        = var.task_family_name
   ecs_service_name       = var.ecs_service_name

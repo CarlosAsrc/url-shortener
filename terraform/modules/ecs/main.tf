@@ -35,6 +35,7 @@ resource "aws_ecs_task_definition" "task" {
   requires_compatibilities = ["EC2"]
   cpu                      = var.cpu
   execution_role_arn       = var.execution_role_arn
+  task_role_arn            = var.task_role_arn
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = "X86_64"
@@ -63,10 +64,10 @@ resource "aws_ecs_task_definition" "task" {
         }
       }
       health_check = {
-        command     = ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
-        interval    = 10
-        timeout     = 10
-        retries     = 3
+        command      = ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+        interval     = 10
+        timeout      = 10
+        retries      = 3
         start_period = 60
       }
     }

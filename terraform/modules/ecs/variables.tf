@@ -35,6 +35,11 @@ variable "execution_role_arn" {
   type        = string
 }
 
+variable "task_role_arn" {
+  description = "The ARN of the IAM role that allows ECS to make calls to other AWS services."
+  type        = string
+}
+
 variable "vpc_id" {
   description = "The ID of the VPC."
   type        = string
