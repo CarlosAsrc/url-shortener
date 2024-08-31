@@ -8,6 +8,11 @@ output "public_subnets" {
   value       = aws_subnet.public.*.id
 }
 
+output "private_subnets" {
+  description = "The IDs of the public subnets."
+  value       = aws_subnet.private.*.id
+}
+
 output "public_route_table_id" {
   description = "The ID of the public route table."
   value       = aws_route_table.public_rt.id

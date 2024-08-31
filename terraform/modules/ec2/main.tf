@@ -36,7 +36,7 @@ resource "aws_launch_template" "ecs_lt" {
 }
 
 resource "aws_autoscaling_group" "ecs_asg" {
-  vpc_zone_identifier = var.subnets
+  vpc_zone_identifier = var.private_subnets
   desired_capacity    = var.desired_count
   min_size            = var.min_count
   max_size            = var.max_count
@@ -51,9 +51,4 @@ resource "aws_autoscaling_group" "ecs_asg" {
     value               = true
     propagate_at_launch = true
   }
-}
-
-
-output "auto_scaling_group_arn" {
-  value = aws_autoscaling_group.ecs_asg.arn
 }

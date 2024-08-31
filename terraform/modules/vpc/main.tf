@@ -7,6 +7,7 @@ resource "aws_vpc" "ecs_vpc" {
   }
 }
 
+// Public subnets config:
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.ecs_vpc.id
   count                   = length(var.public_subnet_cidrs)
@@ -45,6 +46,59 @@ resource "aws_route_table_association" "public_rta" {
   count          = length(var.public_subnet_cidrs)
   subnet_id      = element(aws_subnet.public.*.id, count.index)
   route_table_id = aws_route_table.public_rt.id
+}
+
+// Private subnets config:
+
+resource "aws_subnet" "private" {
+  vpc_id            = aws_vpc.ecs_vpc.id
+  count             = length(var.private_subnet_cidrs)
+  cidr_block        = element(var.private_subnet_cidrs, count.index)
+  availability_zone = element(data.aws_availability_zones.available.names, count.index)
+
+  tags = {
+    Name = "${var.vpc_name}-private-subnet-${count.index + 1}"
+  }
+}
+
+resource "aws_nat_gateway" "nat" {
+  count         = length(var.public_subnet_cidrs)
+  allocation_id = element(aws_eip.nat.*.id, count.index)
+  subnet_id     = element(aws_subnet.public.*.id, count.index)
+
+  tags = {
+    Name = "${var.vpc_name}-nat-${count.index + 1}"
+  }
+}
+
+resource "aws_eip" "nat" {
+  count = length(var.public_subnet_cidrs)
+
+  vpc = true
+
+  tags = {
+    Name = "${var.vpc_name}-nat-eip-${count.index + 1}"
+  }
+}
+
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.ecs_vpc.id
+  count  = length(var.private_subnet_cidrs)
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = element(aws_nat_gateway.nat.*.id, count.index)
+  }
+
+  tags = {
+    Name = "${var.vpc_name}-private-rt"
+  }
+}
+
+resource "aws_route_table_association" "private_rta" {
+  count          = length(var.private_subnet_cidrs)
+  subnet_id      = element(aws_subnet.private.*.id, count.index)
+  route_table_id = aws_route_table.private_rt[count.index].id
 }
 
 resource "aws_security_group" "ecs_sg" {

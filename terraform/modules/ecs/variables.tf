@@ -35,13 +35,23 @@ variable "execution_role_arn" {
   type        = string
 }
 
+variable "task_role_arn" {
+  description = "The ARN of the IAM role that allows ECS to make calls to other AWS services."
+  type        = string
+}
+
 variable "vpc_id" {
   description = "The ID of the VPC."
   type        = string
 }
 
-variable "subnets" {
-  description = "The subnets associated with the ECS service."
+variable "public_subnets" {
+  description = "The public subnets associated with the ECS deployment."
+  type        = list(string)
+}
+
+variable "private_subnets" {
+  description = "The private subnets associated with the ECS deployment."
   type        = list(string)
 }
 

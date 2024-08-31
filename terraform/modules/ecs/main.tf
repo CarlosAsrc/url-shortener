@@ -3,7 +3,7 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 }
 
 resource "aws_ecs_capacity_provider" "ecs_capacity_provider" {
-  name = "test1"
+  name = "cluster_capacity_provider"
 
   auto_scaling_group_provider {
     auto_scaling_group_arn = var.auto_scaling_group_arn
@@ -35,6 +35,7 @@ resource "aws_ecs_task_definition" "task" {
   requires_compatibilities = ["EC2"]
   cpu                      = var.cpu
   execution_role_arn       = var.execution_role_arn
+  task_role_arn            = var.task_role_arn
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = "X86_64"
@@ -63,10 +64,10 @@ resource "aws_ecs_task_definition" "task" {
         }
       }
       health_check = {
-        command     = ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
-        interval    = 10
-        timeout     = 10
-        retries     = 3
+        command      = ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+        interval     = 10
+        timeout      = 10
+        retries      = 3
         start_period = 60
       }
     }
@@ -78,7 +79,7 @@ resource "aws_lb" "ecs_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = var.security_groups
-  subnets            = var.subnets
+  subnets            = var.public_subnets
 
   enable_deletion_protection = false
 
@@ -121,7 +122,7 @@ resource "aws_ecs_service" "service" {
   desired_count   = var.desired_count
 
   network_configuration {
-    subnets         = var.subnets
+    subnets         = var.private_subnets
     security_groups = var.security_groups
   }
 
