@@ -15,8 +15,8 @@ This project implements a URL shortening service using Go, DynamoDB, ECS, and Te
     - [ecs](#module-ecs)
     - [ec2](#module-ec2)
 - [Go Server Routes](#go-server-routes)
-  - [POST /api/shorten](#post-apishorten)
-  - [GET /{short_code}](#get-short_code)
+  - [POST /shorten](#post-apishorten)
+  - [GET /long-url/{shortURL}](#get-short_code)
 - [URL Shortening Algorithm](#url-shortening-algorithm)
 
 ## Architecture
@@ -74,7 +74,7 @@ This module provisions the EC2 instances that will run the ECS tasks. It configu
 
 The Go server exposes the following API routes:
 
-### POST /api/shorten
+### POST /shorten
 
 This route accepts a JSON payload with the original URL and returns a short code.
 
@@ -82,7 +82,7 @@ This route accepts a JSON payload with the original URL and returns a short code
 
 ```json
 {
-  "url": "https://www.example.com/long-url"
+  "long_url": "https://www.example.com/long-url"
 }
 ```
 
@@ -90,11 +90,11 @@ Response Body:
 
 ```json
 {
-  "short_code": "short"
+  "short_url": "short"
 }
 ```
 
-### GET /{short_code}
+### GET /long-url/{shortURL}
 This route redirects the user to the original URL associated with the provided short code.
 
 ### URL Shortening Algorithm
